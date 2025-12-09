@@ -16,26 +16,36 @@ use <normal_utulities.scad>;
 
 // length to width = 1.89 to 1.85
 // here: 205mm/125mm = 1.64
+//
+// 1: Διαστάσεις καλουπιού:
+//Μήκος: 155mm
+//Πλάτος: 92mm
+//Ύψος: 65mm
 
-$fn = 80;
-samples = $fn;
+// 2: Διαστάσεις καλουπιού:
+//Μήκος: 180mm
+//Πλάτος: 106mm
+//Ύψος: 65mm
+
+$fn = 100;
+samples = $fn*0.5;
 
 
-stem_cut_height = 205; // FINAL HEIGHT
+stem_cut_height = 230; // FINAL HEIGHT
 
-h = stem_cut_height + 5;  // CURVE MODELLING HEIGHT
-w_actual = 115;
+h = stem_cut_height + 8;  // CURVE MODELLING HEIGHT
+w_actual = 125;
 bulge_actual = 0.3; 
 // BEST EXAMPLES HAVE THE WIDEST POINT AT 1/3 OF HEIGHT TO THE NECK
 
-w_bottom = w_actual * 0.66; // empirical
+w_bottom = w_actual * 0.60; // empirical
 bulge = bulge_actual * 1.66; // empirical
 w_top = 13   -  (h-stem_cut_height)*0.8;
-h_top = 18   -  (h-stem_cut_height)*0.9;
+h_top = 18   -  (h-stem_cut_height)*0.8;
 
-sides_angle_actual = 76;
-sides_angle = sides_angle_actual * 1.09; // empirical
-lift_angle=4;
+sides_angle_actual = 74;
+sides_angle = sides_angle_actual * 1.00; // empirical
+lift_angle=5;
 
 
 
@@ -49,14 +59,16 @@ function bezier_curve(p0, p1, p2, p3, n) =
     [ for (i = [0:(n)]) bezier_point(i/n, p0, p1, p2, p3) ];
     
 p0 = [0,        0];
-p1 = [w_bottom*sin(sides_angle)*1.12, h*0.03];
-p2 = [w_bottom*sin(sides_angle)*0.91, h*bulge]; 
-p3 = [h_top*0.35*sin(sides_angle),    h];
+p1 = [w_bottom*sin(sides_angle)*1.17, w_bottom*sin(sides_angle)*sin(lift_angle)*1.01];
+p2 = [w_bottom*sin(sides_angle)*0.90, h*bulge*0.96]; 
+p3 = [h_top*sin(sides_angle)*0.49,    h];
+echo("bezier guides for top:", p0,p1,p2,p3);
 profile    = bezier_curve(p0, p1,  p2, p3, samples);
 
 p1s = [w_bottom*1.26, 0];
 p2s = [w_bottom*0.92, h*bulge]; 
 p3s = [w_top,    h];
+echo("bezier guides for soundboard:", p0,p1s,p2s,p3s);
 soundboard = bezier_curve(p0, p1s, p2s, p3s,  samples);
 
 // 1. The original rotational body (stops at 80 degrees)
@@ -70,9 +82,9 @@ module pear_body(angle) {
 
 module pear_with_extension(sides_angle)
 {
-        translate([0.35*h_top+stem_cut_height*(sin(lift_angle)),
+        translate([0.32*h_top+stem_cut_height*(sin(lift_angle)),
                     0,
-                    stem_cut_height*(sin(lift_angle)*sin(lift_angle) + 0.014)])
+                    stem_cut_height*(sin(lift_angle)*sin(lift_angle) + 0.001)])
         rotate([0,-lift_angle,0])
                 pear_body(sides_angle); 
 
@@ -127,6 +139,6 @@ module soundboard_trimmer() {
 
 //projection(cut = false)
 //slice_at_z(-1, thickness=1) 
-//rotate([90,90,0])
-scale([1.1,1,1])
+//rotate([90,90,90])
+scale([1.0,1,1])
 baglama_round_top(sides_angle);
